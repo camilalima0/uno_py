@@ -1,35 +1,39 @@
-from pyDatalog import pyDatalog
-import random
-import os
+from pyDatalog import pyDatalog #linguagem lógica como o prolog
+import random #embaralhar cartas aleatoriamente
 
-# Inicializando pyDatalog
+# cria os termos carta e pode_jogar
 pyDatalog.create_terms('carta, pode_jogar')
 
-# Fatos sobre as cartas
+# define as cartas possiveis
 cores = ['vermelho', 'azul', 'verde', 'amarelo']
 valores_numericos = list(range(0, 10))  # 0-9
 valores_especiais = ['pular', 'inverter', '+2']
 curingas = [('preto', 'curinga'), ('preto', '+4')]
 
-# Criando as cartas
+# criando as cartas
 for cor in cores:
     pyDatalog.assert_fact('carta', cor, 0)
     for valor in valores_numericos[1:] + valores_especiais:
-        pyDatalog.assert_fact('carta', cor, valor)
+        pyDatalog.assert_fact('carta', cor, valor) #equivale a carta(cor, valor) em prolog
         pyDatalog.assert_fact('carta', cor, valor)
 
+# criando os curingas
 for _ in range(4):
     for cor, valor in curingas:
         pyDatalog.assert_fact('carta', cor, valor)
 
-# Regras
+# regras
 def pode_jogar(carta_atual, carta_jogada, cor_curinga=None):
+    #se a carta é preta, é curinga, portanto pode jogar
     if carta_jogada[0] == 'preto':
         return True
     if cor_curinga:
+        #se a carta anterior é curinga, a cor escolhida deve ser jogada
         return carta_jogada[0] == cor_curinga
+    #se a cor ou o valor são iguais, pode jogar
     return carta_atual[0] == carta_jogada[0] or carta_atual[1] == carta_jogada[1]
 
+#pesquisa a primeira carta que a ia pode jogar
 def melhor_jogada(cartas, carta_atual, cor_curinga=None):
     for carta in cartas:
         if pode_jogar(carta_atual, carta, cor_curinga):
@@ -85,6 +89,7 @@ def escolher_cor():
             return cor
         print("Cor inválida.")
 
+#se for +4 ou +2, aplica o efeito
 def aplicar_efeito(estado):
     if estado.efeito_proximo_turno == '+4':
         print("Você comprou 4 cartas devido ao +4.") if estado.turno == 'jogador' else print("IA comprou 4 cartas devido ao +4.")
